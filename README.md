@@ -21,12 +21,14 @@ Next diagram shows architecture of this PoC.
                             +--------------------+
 ```
 
+Exchanges are created first time a consumer runs. Then, it will be kept by RabbitMQ (are durables).
+
 To avoid message lost, we use an **alternate exchange** to collect unroutable messages, mainly because no queues consuming from main exchange. When no consumer
 
 ## Requisites
 
-- **Docker** to start a RabbitMQ instance
-- **Go 1.7+** to compile the examples
+- [Docker](https://www.docker.com/) to start a RabbitMQ instance.
+- [Go 1.7+](https://go.dev/) to build the examples
 
 ## Building
 
@@ -40,25 +42,16 @@ Example: clean and build all: `make clean all`
 
 ### Start RabbitMQ
 
+Create and run a container:
+
 ```bash
 docker run -detach --rm \
-    --hostname poc-fanout-notification-service-rabbit \
-    --name poc-fanout-notification-service-rabbit \
+    --hostname poc-fanout-rabbit \
+    --name poc-fanout-rabbit \
     --publish 15672:15672 \
     --publish 5672:5672 \
     rabbitmq:3.8-management
 ```
-
-Then you can [access RabbitMQ management console](http://localhost:15672), with user=`guest`, password=`guest`, and create an exchange with properties:
-
-| name        |  value           |
-|-------------|------------------|
-| Name        | **poc.exchange** |
-| Type        | **fanout**       |
-| Durability  | Durable          |
-| Auto delete | No               |
-| Internal    | No               |
-| Arguments   | *none*           |
 
 ### Start consumers and producers
 
