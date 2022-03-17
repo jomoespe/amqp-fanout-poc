@@ -8,7 +8,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
-const exchange = "poc.messages"
+const (
+	exchangeName = "poc.messages"
+	messageType  = "poc.message.type"
+)
 
 func main() {
 	if len(os.Args) != 2 {
@@ -26,13 +29,15 @@ func main() {
 	defer ch.Close()
 
 	err = ch.Publish(
-		exchange, // exchange
-		"",       // routing key
-		false,    // mandatory
-		false,    // immediate
+		exchangeName, // exchange
+		"",           // routing key
+		false,        // mandatory
+		false,        // immediate
 		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(msg),
+			ContentType:  "text/plain",
+			DeliveryMode: amqp.Persistent,
+			Type:         messageType, // Application-specific message type, e.g. "orders.created"
+			Body:         []byte(msg),
 		})
 	failOnError(err, "Failed to publish a message")
 }
