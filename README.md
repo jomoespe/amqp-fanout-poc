@@ -67,3 +67,8 @@ Produce a message:
 ```bash
 ./bin/produce MSG
 ```
+
+## Related
+
+- [RabbitMQ Exchanges, routing keys and bindings](https://www.cloudamqp.com/blog/part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html) for a description of RabbitMQ exchange types.
+- [RabbitMQ Go Tutorial](https://www.rabbitmq.com/tutorials/tutorial-one-go.html)
