@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	exchangeName = "poc.messages"
-	messageType  = "poc.message.type"
+	exchangeName = "direct"
 )
 
 func main() {
@@ -34,10 +33,8 @@ func main() {
 		false,        // mandatory
 		false,        // immediate
 		amqp.Publishing{
-			ContentType:  "text/plain",
-			DeliveryMode: amqp.Persistent,
-			Type:         messageType, // Application-specific message type, e.g. "orders.created"
-			Body:         []byte(msg),
+			ContentType: "text/plain",
+			Body:        []byte(msg),
 		})
 	failOnError(err, "Failed to publish a message")
 }
