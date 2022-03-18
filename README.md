@@ -89,3 +89,4 @@ Produce a message:
 - [RabbitMQ Documentation - Alternate Exchanges](https://www.rabbitmq.com/ae.html)
 - [RabbitMQ Documentation - Exchange to Exchange Bindings](https://www.rabbitmq.com/e2e.html)
 - [RabbitMQ Go Tutorial](https://www.rabbitmq.com/tutorials/tutorial-one-go.html)
+- [RabbitMQ Simulator](http://tryrabbitmq.com/)
