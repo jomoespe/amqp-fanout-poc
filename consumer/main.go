@@ -9,10 +9,15 @@ import (
 )
 
 const (
+	directExchangeName    = "direct"
 	exchangeName          = "poc.messages"
 	alternateExchangeName = exchangeName + "-alternate"
 )
 
+/*
+ *  producer --> topic --[exchange bind]--> fanout
+ *                                             \--> alternate --> queue
+ */
 func main() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Error to connect to RabbitMQ")
@@ -22,7 +27,19 @@ func main() {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	// First create the alternate exchange, the alternate queue and bind it
+	// First create the direct exchange
+	err = ch.ExchangeDeclare(
+		directExchangeName, // name
+		"direct",           // kind
+		true,               // durable
+		false,              // auto-delete
+		false,              // internal
+		false,              // no-wait
+		nil,                // arguments
+	)
+	failOnError(err, fmt.Sprintf("Failed to declare the direct exchange %s", alternateExchangeName))
+
+	// Second create the alternate exchange, the alternate queue and bind it
 	err = ch.ExchangeDeclare(
 		alternateExchangeName, // name
 		"fanout",              // kind
@@ -53,8 +70,8 @@ func main() {
 	)
 	failOnError(err, fmt.Sprintf("Failed to bind the alternate queue %s to alternate exchange %s", alternateQueue.Name, alternateExchangeName))
 
-	// Then create the messaging/events exchange, the alternate queue and bind it
-	// When declaring the exchange  we configure the alternate exchange
+	// Then create the messaging/events (fanout) exchange, and configure the alternate exchange,
+	// and bind direct and fanout exchange
 	err = ch.ExchangeDeclare(
 		exchangeName, // name
 		"fanout",     // kind
@@ -68,6 +85,16 @@ func main() {
 	)
 	failOnError(err, fmt.Sprintf("Failed to declare the exchange %s", exchangeName))
 
+	err = ch.ExchangeBind(
+		exchangeName,       // destination,
+		"",                 // key
+		directExchangeName, // source
+		true,               // noWait
+		nil,                // args
+	)
+	failOnError(err, fmt.Sprintf("Failed to bind direct exchange %s with fanout exchange %s", directExchangeName, exchangeName))
+
+	// then we create the queue for consuming from fanout exchange
 	q, err := ch.QueueDeclare(
 		queueName(), // name. Queue name empty will generate a unique name which will be returned in the Name field
 		false,       // durable
