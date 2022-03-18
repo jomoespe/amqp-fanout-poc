@@ -5,21 +5,29 @@ A simple example of producing a message to a RabbitMQ exchange (*poc.messages*) 
 Next diagram shows architecture of this PoC.
 
 ```text
-                             +----------------+                +-----------+              +------------+
-+-------------+              |     fanout     |            +-->|   queue   |--(message)-->|  Consumer  |
-|  Publisher  |--(message)-->|    exchange    |--[ bind ]--|   +-----------+-+            +------------+-+
-+-------------+              | (poc.messages) |            +-->  |   queue   |--(message)-->|  Consumer  |
-                             +----------------+                  +-----------+               +------------+
-                                     |                                                            ^
-                            (unconsumed messages)                                                 |
-                                     |                                               (read messages on connect)
-                                     V                                                            |
-                            +------------------- +
-                            |  alternate fanout  |             +-----------+                      |
-                            |      exchange      |--[ bind ]-->|   queue   |- - - - - - - - - - - +
-                            | (poc.messages.alt) |             +-----------+
-                            +--------------------+
+                             +----------------+                +----------------+                +-----------+              +------------+
++-------------+              |     topic      |                |     fanout     |            +-->|   queue   |--(message)-->|  Consumer  |
+|  Publisher  |--(message)-->|    exchange    |--[ routing ]-->|    exchange    |--[ bind ]--|   +-----------+-+            +------------+-+
++-------------+              |                |                | (poc.messages) |            +-->  |   queue   |--(message)-->|  Consumer  |
+                             +----------------+                +----------------+                  +-----------+               +------------+
+                                                                        |                                                            ^
+                                                               (unconsumed messages)                                                 |
+                                                                        |                                               (read messages on connect)
+                                                                        V                                                            |
+                                                               +------------------- +
+                                                               |  alternate fanout  |             +-----------+                      |
+                                                               |      exchange      |--[ bind ]-->|   queue   |- - - - - - - - - - - +
+                                                               | (poc.messages.alt) |             +-----------+
+                                                               +--------------------+
 ```
+
+Components:
+
+- **Publisher**
+- **Topic exchange**: Current exchanges to publish events.
+- **Fanout exchange**: The exchange to publish events to consumers. Bound to topic exchange ([exchange to exchange bindings](https://www.rabbitmq.com/e2e.html)).
+- **Alternate fanout exchange**: The fanout alternate exchange to send messages not consumed by queues ([alternate exchanges](https://www.rabbitmq.com/ae.html)).
+- **Consumers**
 
 Exchanges are created first time a consumer runs. Then, it will be kept by RabbitMQ (are durables).
 
@@ -79,4 +87,5 @@ Produce a message:
 - [RabbitMQ Exchanges, routing keys and bindings](https://www.cloudamqp.com/blog/part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html) for a description of RabbitMQ exchange types.
 - [Collecting Unroutable Messages in a RabbitMQ Alternate Exchange](https://www.cloudamqp.com/blog/collecting-unroutable-messages-in-a-rabbitmq-alternate-exchange.html)
 - [RabbitMQ Documentation - Alternate Exchanges](https://www.rabbitmq.com/ae.html)
+- [RabbitMQ Documentation - Exchange to Exchange Bindings](https://www.rabbitmq.com/e2e.html)
 - [RabbitMQ Go Tutorial](https://www.rabbitmq.com/tutorials/tutorial-one-go.html)
